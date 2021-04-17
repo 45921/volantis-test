@@ -107,3 +107,6 @@ deploy:
   type: git
   repository: 
     github: git@github.io_nanami:45921/volantis-test.git,gh-page
+
+syzoj_renderer:
+  highlighter: hexo
