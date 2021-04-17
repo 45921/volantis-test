@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '12'
 
-      - name: Setup Hexo and gulp
+      - name: Setup Hexo
         env:
           ACTION_DEPLOY_KEY: ${{ secrets.HEXO_DEPLOY_KEY }}
           ACTION_SSH_CONFIG: ${{ secrets.HEXO_SSH_CONFIG }}
@@ -37,12 +37,10 @@ jobs:
           git submodule init
           git submodule update
           npm install hexo-cli -g
-          npm install gulp -g
           npm install
 
       - name: Build & Deploy
         run: |
           hexo clean
           hexo generate
-          gulp
           hexo deploy
