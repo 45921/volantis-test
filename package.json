@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "start": "hexo clean && hexo s",
+    "setup": "yarn && git submodule init && git submodule update",
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
