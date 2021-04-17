@@ -104,4 +104,6 @@ theme: volantis
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: ''
+  type: git
+  repository: 
+    github: git@github.io_nanami:45921/volantis-test.git,gh-page
