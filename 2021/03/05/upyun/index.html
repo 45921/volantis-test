@@ -54,6 +54,8 @@
   <noscript><link rel="stylesheet" href="/css/style.css"></noscript>
   
 
+  <script id="loadcss"></script>
+
   
 <script>
 if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMode))
@@ -227,7 +229,6 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-      <!-- see: /layout/_partial/scripts/coverCtrl.ejs -->
         <div id="half" class='cover-wrapper post dock' style="display: ;">
           
             <div class='cover-bg lazyload placeholder' data-bg="https://7.dusays.com/2021/04/17/8684a996f98bc.png"></div>
@@ -289,7 +290,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-<div id="l_main" class=''>
+<div class='l_main'>
   <article class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
   
 
@@ -590,7 +591,7 @@ n\log n
 
 
 </div>
-<aside id='l_side'>
+<aside class='l_side'>
   
   
     
@@ -630,20 +631,17 @@ n\log n
   pdata.postTitle="使用又拍云联盟作为博客的图床";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
-  //  see: /layout/_partial/scripts/coverCtrl.ejs
+  // header 这里无论是否开启pjax都需要
+  var l_header=document.getElementById("l_header");
   
-    // header
-    var l_header=document.getElementById("l_header");
+  l_header.classList.remove("show");
+  
+  
+    // cover
+    var cover_wrapper=document.querySelector('.cover-wrapper');
     
-    l_header.classList.remove("show");
-    
-    
-      // cover
-      var cover_wrapper=document.querySelector('#l_cover .cover-wrapper');
-      var scroll_down=document.getElementById('scroll-down');
-      cover_wrapper.id="half";
-      cover_wrapper.style.display="";
-      scroll_down.style.display="none";
+    cover_wrapper.id="half";
+    cover_wrapper.style.display="";
     
   
 </script>
@@ -711,148 +709,118 @@ n\log n
     </div>
     <div>
       <script>
-  /************这个文件存放不需要重载的全局变量和全局函数*********/
-  window.volantis = {}; // volantis 全局变量
-  volantis.$ = {}; // 页面选择器 将jQuery对象缓存起来 see: /source/js/app.js etc.
-  /******************** RunItem ********************************/
-  function RunItem() {
-    this.list = []; // 存放回调函数
-    this.start = () => {
-      for (var i = 0; i < this.list.length; i++) {
-        this.list[i].run();
-      }
-    };
-    this.push = (fn, name) => {
-      var f = new Item(fn, name);
-      this.list.push(f);
-    };
-    // 构造一个可以run的对象
-    function Item(fn, name) {
-      // 函数名称
-      this.name = name || fn.name;
-      // run方法
-      this.run = () => {
-        try {
-          fn();
-        } catch (error) {
-          console.log(error);
-        }
-      };
-    }
-  }
-  /******************** Pjax ********************************/
-  // /layout/_third-party/pjax/index.ejs
-  // volantis.pjax.send(callBack[,"callBackName"]) 传入pjax:send回调函数
-  // volantis.pjax.push(callBack[,"callBackName"]) 传入pjax:complete回调函数
-  // volantis.pjax.error(callBack[,"callBackName"]) 传入pjax:error回调函数
-  volantis.pjax = {};
-  volantis.pjax.method = {
-    complete: new RunItem(),
-    error: new RunItem(),
-    send: new RunItem(),
-  };
-  volantis.pjax = {
-    ...volantis.pjax,
-    push: volantis.pjax.method.complete.push,
-    error: volantis.pjax.method.error.push,
-    send: volantis.pjax.method.send.push,
-  };
-  /********************  Dark Mode  ********************************/
-  // /layout/_partial/scripts/darkmode.ejs
-  // volantis.dark.mode 当前模式 dark or light
-  // volantis.dark.toggle() 暗黑模式触发器
-  // volantis.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
-  volantis.dark = {};
-  volantis.dark.method = {
-    toggle: new RunItem(),
-  };
-  volantis.dark = {
-    ...volantis.dark,
-    push: volantis.dark.method.toggle.push,
-  };
-  /********************  Message  ********************************/
-  // /layout/_third-party/message/script.ejs
-  // volantis.message(title,message,type,autoClose)
-  /********************  isMobile  ********************************/
-  // /source/js/app.js
-  // volantis.isMobile
-  // volantis.isMobileOld
-  /********************脚本懒加载函数********************************/
-  // 已经加入了setTimeout
-  function loadScript(src, cb) {
-    setTimeout(function () {
-      var HEAD =
-        document.getElementsByTagName("head")[0] || document.documentElement;
-      var script = document.createElement("script");
-      script.setAttribute("type", "text/javascript");
-      if (cb) script.onload = cb;
-      script.setAttribute("src", src);
-      HEAD.appendChild(script);
-    });
-  }
-  //https://github.com/filamentgroup/loadCSS
-  var loadCSS = function (href, before, media, attributes) {
-    var doc = window.document;
-    var ss = doc.createElement("link");
-    var ref;
-    if (before) {
-      ref = before;
-    } else {
-      var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
-      ref = refs[refs.length - 1];
-    }
-    var sheets = doc.styleSheets;
-    if (attributes) {
-      for (var attributeName in attributes) {
-        if (attributes.hasOwnProperty(attributeName)) {
-          ss.setAttribute(attributeName, attributes[attributeName]);
-        }
-      }
-    }
-    ss.rel = "stylesheet";
-    ss.href = href;
-    ss.media = "only x";
-    function ready(cb) {
-      if (doc.body) {
-        return cb();
-      }
-      setTimeout(function () {
-        ready(cb);
-      });
-    }
-    ready(function () {
-      ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
-    });
-    var onloadcssdefined = function (cb) {
-      var resolvedHref = ss.href;
-      var i = sheets.length;
-      while (i--) {
-        if (sheets[i].href === resolvedHref) {
-          return cb();
-        }
-      }
-      setTimeout(function () {
-        onloadcssdefined(cb);
-      });
-    };
-    function loadCB() {
-      if (ss.addEventListener) {
-        ss.removeEventListener("load", loadCB);
-      }
-      ss.media = media || "all";
-    }
-    if (ss.addEventListener) {
-      ss.addEventListener("load", loadCB);
-    }
-    ss.onloadcssdefined = onloadcssdefined;
-    onloadcssdefined(loadCB);
-    return ss;
-  };
+/************这个文件存放不需要重载的全局变量和全局函数*********/
+window.volantis={};
+window.volantis.loadcss=document.getElementById("loadcss");
+/******************** Pjax ********************************/
+function VPjax(){
+	this.list=[] // 存放回调函数
+	this.start=()=>{
+	  for(var i=0;i<this.list.length;i++){
+		this.list[i].run();
+	  }
+	}
+	this.push=(fn,name)=>{
+		var f=new PjaxItem(fn,name);
+		this.list.push(f);
+	}
+	// 构造一个可以run的对象
+	function PjaxItem(fn,name){
+		// 函数名称
+		this.name = name || fn.name
+		// run方法
+		this.run=()=>{
+			fn()
+		}
+	}
+}
+volantis.pjax={}
+volantis.pjax.method={
+	complete: new VPjax(),
+	error: new VPjax(),
+	send: new VPjax()
+}
+volantis.pjax={
+	...volantis.pjax,
+	push: volantis.pjax.method.complete.push,
+	error: volantis.pjax.method.error.push,
+	send: volantis.pjax.method.send.push
+}
+/********************脚本懒加载函数********************************/
+// 已经加入了setTimeout
+function loadScript(src, cb) {
+	setTimeout(function() {
+		var HEAD = document.getElementsByTagName('head')[0] || document.documentElement;
+		var script = document.createElement('script');
+		script.setAttribute('type','text/javascript');
+		if (cb) script.onload = cb;
+		script.setAttribute('src', src);
+		HEAD.appendChild(script);
+	});
+}
+//https://github.com/filamentgroup/loadCSS
+var loadCSS = function( href, before, media, attributes ){
+	var doc = window.document;
+	var ss = doc.createElement( "link" );
+	var ref;
+	if( before ){
+		ref = before;
+	}
+	else {
+		var refs = ( doc.body || doc.getElementsByTagName( "head" )[ 0 ] ).childNodes;
+		ref = refs[ refs.length - 1];
+	}
+	var sheets = doc.styleSheets;
+	if( attributes ){
+		for( var attributeName in attributes ){
+			if( attributes.hasOwnProperty( attributeName ) ){
+				ss.setAttribute( attributeName, attributes[attributeName] );
+			}
+		}
+	}
+	ss.rel = "stylesheet";
+	ss.href = href;
+	ss.media = "only x";
+	function ready( cb ){
+		if( doc.body ){
+			return cb();
+		}
+		setTimeout(function(){
+			ready( cb );
+		});
+	}
+	ready( function(){
+		ref.parentNode.insertBefore( ss, ( before ? ref : ref.nextSibling ) );
+	});
+	var onloadcssdefined = function( cb ){
+		var resolvedHref = ss.href;
+		var i = sheets.length;
+		while( i-- ){
+			if( sheets[ i ].href === resolvedHref ){
+				return cb();
+			}
+		}
+		setTimeout(function() {
+			onloadcssdefined( cb );
+		});
+	};
+	function loadCB(){
+		if( ss.addEventListener ){
+			ss.removeEventListener( "load", loadCB );
+		}
+		ss.media = media || "all";
+	}
+	if( ss.addEventListener ){
+		ss.addEventListener( "load", loadCB);
+	}
+	ss.onloadcssdefined = onloadcssdefined;
+	onloadcssdefined( loadCB );
+	return ss;
+};
 </script>
-
 <script>
   
-  loadCSS("https://cdn.jsdelivr.net/gh/volantis-x/cdn-fontawesome-pro@master/css/all.min.css");
+  loadCSS("https://cdn.jsdelivr.net/gh/volantis-x/cdn-fontawesome-pro@master/css/all.min.css", window.volantis.loadcss);
   
   
   
@@ -903,7 +871,7 @@ n\log n
   };
   function SCload_fancybox() {
     if ($(".md .gallery").find("img").length == 0) return;
-    loadCSS("https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css");
+    loadCSS("https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css", document.getElementById("loadcss"));
     loadScript('https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js', pjax_fancybox)
   };
   $(function () {
@@ -929,58 +897,46 @@ n\log n
 
 
 
-
-
   
-
   
 
   <div id="rightmenu-wrapper">
     <ul class="list-v rightmenu" id="rightmenu-content">
-      <li class='navigation menuNavigation-Content'>
-        <a class='nav icon-only fix-cursor-default' onclick='history.back()'><i class='fal fa-arrow-left fa-fw'></i></a>
-        <a class='nav icon-only fix-cursor-default' onclick='history.forward()'><i class='fal fa-arrow-right fa-fw'></i></a>
-        <a class='nav icon-only fix-cursor-default' onclick='window.location.reload()'><i class='fal fa-redo fa-fw'></i></a>
-        <a class='nav icon-only fix-cursor-default' href='/'><i class='fal fa-home fa-fw'></i></a>
+      <li class='option'>
+        <a class='vlts-menu opt fix-cursor-default' id='menu-copy-text' onclick="document.execCommand('copy')"><i class='fa fa-copy fa-fw'></i>Copy Text</a>
+        <hr id='hr-text'>
+        <a class='vlts-menu opt fix-cursor-default' id='menu-copy-href'><i class='fa fa-link fa-fw'></i>Copy Link</a>
+        <a class='vlts-menu opt fix-cursor-default' id='menu-open-href'><i class='fa fa-external-link-square-alt fa-fw'></i>Open Link in New Tab</a>
+        <hr id='hr-href'>
+        <a class='vlts-menu opt fix-cursor-default' id='menu-copy-src'><i class='fa fa-image fa-fw'></i>Copy Image Link</a>
+        <hr id='hr-src'>
       </li>
-      <li class='option menuOption-Content'>
-        <a class='vlts-menu opt fix-cursor-default menu-Option' data-fn-type='copyText'>
-          <i class='fal fa-copy fa-fw'></i>Copy Text
-        </a>
-        <a class='vlts-menu opt fix-cursor-default menu-Option' data-fn-type='copyPaste'>
-          <i class='fal fa-paste fa-fw'></i>粘贴文本
-        </a>
-        <a class='vlts-menu opt fix-cursor-default menu-Option' data-fn-type='copySelect'>
-          <i class='fal fa-object-ungroup fa-fw'></i>全选文本
-        </a>
-        <a class='vlts-menu opt fix-cursor-default menu-Option' data-fn-type='copyCut'>
-          <i class='fal fa-cut fa-fw'></i>剪切文本
-        </a>
-        <a class='vlts-menu opt fix-cursor-default menu-Option' data-fn-type='openTab'>
-          <i class='fal fa-external-link-square-alt fa-fw'></i>Open Link in New Tab
-        </a>
-        <a class='vlts-menu opt fix-cursor-default menu-Option' data-fn-type='copySrc'>
-          <i class='fal fa-image fa-fw'></i>Copy Image Link
-        </a>
-      </li>
+      
+        <li class='navigation'>
+          <a class='nav icon-only fix-cursor-default' onclick='history.back()'><i class='fa fa-arrow-left fa-fw'></i></a>
+          <a class='nav icon-only fix-cursor-default' onclick='history.forward()'><i class='fa fa-arrow-right fa-fw'></i></a>
+          <a class='nav icon-only fix-cursor-default' onclick='window.location.reload()'><i class='fa fa-redo fa-fw'></i></a>
+          <a class='nav icon-only fix-cursor-default' href='/'><i class='fa fa-home fa-fw'></i></a>
+        </li>
+      
+      <hr>
       
         
       
         
-          <hr class="menuLoad-Content">
+          <hr>
         
       
         
           
-    <li class="menuLoad-Content">
-      <a class='vlts-menu fix-cursor-default' href=https://volantis.js.org/faqs/
+    <li>
+      <a class='vlts-menu fix-cursor-default ' href=https://volantis.js.org/faqs/
         
         
         
         
           id="https:volantisjsorgfaqs"
-        
-      >
+        >
         <i class='fa fa-question fa-fw'></i> 常见问题
       </a>
     </li>
@@ -989,15 +945,14 @@ n\log n
       
         
           
-    <li class="menuLoad-Content">
-      <a class='vlts-menu fix-cursor-default' href=https://volantis.js.org/examples/
+    <li>
+      <a class='vlts-menu fix-cursor-default ' href=https://volantis.js.org/examples/
         
         
         
         
           id="https:volantisjsorgexamples"
-        
-      >
+        >
         <i class='fa fa-rss fa-fw'></i> 示例博客
       </a>
     </li>
@@ -1006,15 +961,14 @@ n\log n
       
         
           
-    <li class="menuLoad-Content">
-      <a class='vlts-menu fix-cursor-default' href=https://volantis.js.org/contributors/
+    <li>
+      <a class='vlts-menu fix-cursor-default ' href=https://volantis.js.org/contributors/
         
         
         
         
           id="https:volantisjsorgcontributors"
-        
-      >
+        >
         <i class='fa fa-fan fa-spin fa-fw'></i> 加入社区
       </a>
     </li>
@@ -1022,20 +976,19 @@ n\log n
         
       
         
-          <hr class="menuLoad-Content">
+          <hr>
         
       
         
           
-    <li class="menuLoad-Content">
-      <a class='vlts-menu fix-cursor-default' href=https://github.com/volantis-x/volantis-docs/
+    <li>
+      <a class='vlts-menu fix-cursor-default ' href=https://github.com/volantis-x/volantis-docs/
         
         
         
         
           id="https:githubcomvolantis-xvolantis-docs"
-        
-      >
+        >
         <i class='fa fa-code-branch fa-fw'></i> 本站源码
       </a>
     </li>
@@ -1044,15 +997,14 @@ n\log n
       
         
           
-    <li class="menuLoad-Content">
-      <a class='vlts-menu fix-cursor-default' href=https://github.com/volantis-x/hexo-theme-volantis/
+    <li>
+      <a class='vlts-menu fix-cursor-default ' href=https://github.com/volantis-x/hexo-theme-volantis/
         
         
         
         
           id="https:githubcomvolantis-xhexo-theme-volantis"
-        
-      >
+        >
         <i class='fa fa-code-branch fa-fw'></i> 主题源码
       </a>
     </li>
@@ -1060,19 +1012,25 @@ n\log n
         
       
         
-          <hr class="menuLoad-Content">
+          <hr>
         
       
         
-          <li class='option menuOption-Content'>
-            <a class='vlts-menu fix-cursor-default toggle-mode-btn menu-Option' data-fn-type='menuDarkBtn'>
-              <i class='fal fa-moon fa-fw '></i> 暗黑模式
-            </a>
-          </li>
+          
+    <li>
+      <a class='vlts-menu fix-cursor-default ' 
+        
+        
+        
+        >
+         暗黑模式
+      </a>
+    </li>
+  
         
       
         
-          <hr class="menuLoad-Content">
+          <hr>
         
       
         
@@ -1081,359 +1039,122 @@ n\log n
   </div>
 
   <script>
-    $(function () {
-      rightMenu.init();
+    window.document.oncontextmenu = function (event) {
+      if (event.ctrlKey) return true;
+      if (/Android|webOS|BlackBerry/i.test(navigator.userAgent)) return true;
+      return popMenu(event);
+    };
+    document.addEventListener("click", function (event) {
+      var mymenu = document.getElementById('rightmenu-wrapper');
+      mymenu.style.display = "none";
     });
-
-    var rightMenu = (function (model) {
-      const fn = {},
-            _rightMenuWrapper = document.getElementById('rightmenu-wrapper'),
-            _rightMenuContent = document.getElementById('rightmenu-content');
-
-      const $menuLoad =  $('.menuLoad-Content'),
-            $menuOption =  $('.menuOption-Content'),
-            $menuDarkBtn =  $('.menu-Option[data-fn-type="menuDarkBtn"]');;
-
-      const $copyText = $('.menu-Option[data-fn-type="copyText"]'),
-            $copyPaste = $('.menu-Option[data-fn-type="copyPaste"]'),
-            $copySelect = $('.menu-Option[data-fn-type="copySelect"]'),
-            $copyCut = $('.menu-Option[data-fn-type="copyCut"]'),
-            $copyHref = $('.menu-Option[data-fn-type="copyHref"]'),
-            $copySrc = $('.menu-Option[data-fn-type="copySrc"]'),
-            $openTab = $('.menu-Option[data-fn-type="openTab"]');
-            
-      model.init = () => {
-        fn.init();
-        fn.initEvent();
+    function popMenu(event) {
+      var mymenu = document.getElementById('rightmenu-wrapper');
+      var menuContent = document.getElementById('rightmenu-content');
+      var screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
+      var screenHeight = document.documentElement.clientHeight || document.body.clientHeight;
+      mymenu.style.left = event.clientX + "px"; // 获取鼠标位置
+      mymenu.style.top = event.clientY + "px";
+      mymenu.style.display = 'block';
+      if (event.clientX * 2 > screenWidth) {
+        menuContent.classList.add('left');
+      } else {
+        menuContent.classList.remove('left');
+      }
+      if (event.clientY * 2 > screenHeight) {
+        menuContent.classList.add('top');
+      } else {
+        menuContent.classList.remove('top');
       }
 
-      fn.init = () => {
-        $copyText.hide();
-        $copySelect.hide();
-        $copyPaste.hide();
-        $copyCut.hide();
-        $copyHref.hide();
-        $copySrc.hide();
-        $openTab.hide();
-      }
+      let hrText = document.getElementById('hr-text');
+      let hrSrc = document.getElementById('hr-src');
+      let hrHref = document.getElementById('hr-href');
 
-      fn.initEvent = () => {
-        window.document.oncontextmenu = (event) => {
-          if (event.ctrlKey || $(window).width() <= 500) {
-            fn.hideMenu();
-            return true;
-          }
-          return fn.popMenu(event);
-        }
-
-        _rightMenuWrapper.oncontextmenu = (event) => {
-          event.stopPropagation();
-          event.preventDefault();
-          return false;
-        }
-
-        // 对应更改图标
-        const darkmodeDark = 'fal fa-moon'.slice(3) || 'moon',
-              darkmodeWhite = 'fal fa-sun'.slice(3) || 'sun';
-        $menuDarkBtn.on('click.rightMenu.setMenuDark', (event) => {
-          $menuDarkBtn.children().toggleClass(darkmodeDark);
-          $menuDarkBtn.children().toggleClass(darkmodeWhite);
-        })
-
-        document.addEventListener('click', () => {
-          fn.hideMenu();
-        })
-      }
-
-      // 菜单位置设定
-      fn.popMenu = (event) => {
-        let mouseClientX = event.clientX;
-        let mouseClientY = event.clientY;
-        let menuWidth = _rightMenuContent.offsetWidth;
-        let menuHeight = _rightMenuContent.offsetHeight;
-        let screenWidth = document.documentElement.clientWidth || document.body.clientWidth;
-        let screenHeight = document.documentElement.clientHeight || document.body.clientHeight;
-        let showLeft = mouseClientX + menuWidth > screenWidth ? mouseClientX - menuWidth + 10 : mouseClientX;
-        let showTop = mouseClientY + menuHeight > screenHeight ? mouseClientY - menuHeight + 10 : mouseClientY;
-        
-        try {
-          fn.setMenuItem(event);
-          _rightMenuWrapper.style.left = showLeft + "px";
-          _rightMenuWrapper.style.top = showTop + "px";
-          _rightMenuWrapper.style.display = 'block';
-        } catch (error) {
-          console.error(error);
-          return true;
-        }
-
-        return false;
-      }
-
-      // 菜单项设置
-      fn.setMenuItem = (event) => {
-        let optionFlag = false;
-        const eventTarget = event.target;
-        const selectText = window.getSelection().toString();
-        
-        // 判断是否是输入框
-        if($(eventTarget).is('input') || $(eventTarget).is('textarea')) {
-          const inputStr = $(eventTarget).val();
-
-          // 复制
-          if(inputStr.length > 0) {
-            $copySelect.show();
-            $copySelect.one("click.rightMenu.copySelect", () => {
-              $(eventTarget).select();
-            })
-          } else {
-            $copySelect.hide();
-          }
-
-          // 剪切
-          if(selectText) {
-            $copyCut.show();
-            $copyCut.one("click.rightMenu.copyCut", () => {
-              const statrPos = eventTarget.selectionStart;
-              const endPos = eventTarget.selectionEnd;
-              fn.copyString(selectText);
-              $(eventTarget).val(inputStr.substring(0, statrPos) + inputStr.substring(endPos, inputStr.length));
-              eventTarget.selectionStart = statrPos;
-              eventTarget.selectionEnd = statrPos;
-              $(eventTarget).focus();
-            })
-          } else {
-            $copyCut.hide();
-          }
-
-          // 粘贴
-          fn.readClipboard().then(text => {
-            // 如果剪切板存在内容
-            if (!!text) {
-              $copyPaste.show();
-              $copyPaste.off("click.rightMenu.cpoyPaste").one("click.rightMenu.cpoyPaste", () => {
-                fn.insertAtCaret($(eventTarget), text);
-              })
-            } else {
-              $copyPaste.hide();
-            }
-          }).catch((err) => {
-            $copyPaste.hide();
-          });
+      // 选中图片
+      let copySrc = document.getElementById('menu-copy-src');
+      if (copySrc != undefined) {
+        if (event.target.currentSrc) {
+          copySrc.style.display = 'block';
+          copySrc.addEventListener("click", function (e) {
+            copyString(event.target.currentSrc);
+          },{once: true});
+          hrSrc.style.display = 'block';
         } else {
-          $copySelect.hide();
-          $copyPaste.hide();
-          $copyCut.hide();
+          copySrc.style.display = 'none';
+          hrSrc.style.display = 'none';
         }
+      }
 
-        // 新标签打开
-        const eventHref = eventTarget.href;
-        if (!!eventHref) {
-          optionFlag = true;
-          $copyHref.show();
-          $openTab.show();
-          $copyHref.one("click.rightMenu.copyHref", () => {
-            fn.copyString(eventHref);
-          });
-          $openTab.one("click.rightMenu.openTab", () => {
-            window.open(eventHref);
-          });
-        } else {
-          $copyHref.hide();
-          $openTab.hide();
-        }
-
-        // 复制图片
-        const eventSrc = eventTarget.currentSrc;
-        if (!!eventSrc) {
-            optionFlag = true;
-            $copySrc.show();
-            $copySrc.one("click.rightMenu.copySrc", () => {
-              fn.copyString(eventSrc);
-            });
-          } else {
-            $copySrc.hide();
+      // 选中按钮
+      // 判断是不是按钮
+      let href = '';
+      if (event.path) {
+        for (i = 0; i < event.path.length; i++) {
+          if (event.path[i].href != undefined && event.path[i].href.length > 0) {
+            href = event.path[i].href;
           }
+        }
+      }
 
+      let copyText = document.getElementById('menu-copy-text');
+      copyText.style.display = 'none';
+      hrText.style.display = 'none';
+      if (href.length == 0) {
         // 选中文本
-        if (selectText) {
+        if (window.getSelection().toString()) {
           if ('' == 'true') {
-            optionFlag = true;
-            $copyText.show();
-            $copyText.one("click.rightMenu.cpoyText", () => {
-              fn.copyString(selectText);
-            })
-          }
-        } else {
-          $copyText.hide();
-        }
-
-        if(optionFlag) {
-          $menuLoad.hide();
-        } else {
-          $menuLoad.show();
-        }
-
-        // 有音乐播放器 see: layout/_third-party/aplayer/script.ejs
-        
-      }
-
-      // 隐藏菜单
-      fn.hideMenu = () => {
-        _rightMenuWrapper.style.display = 'none';
-      }
-
-      // 复制字符串
-      fn.copyString = (str) => {
-        const input = document.createElement('input');
-        input.setAttribute('readonly', 'readonly');
-        document.body.appendChild(input);
-        input.setAttribute('value', str);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        //$.message({title:'复制成功',message: str,type:'success'});
-        fn.hideMenu();
-      }
-
-      // 粘贴文本
-      fn.insertAtCaret = function($elemt, value) {
-        const elemt = $elemt[0];
-        const startPos = elemt.selectionStart,
-              endPos = elemt.selectionEnd;
-        if (document.selection) { 
-            $elemt.focus(); 
-            var sel = document.selection.createRange(); 
-            sel.text = value; 
-            $elemt.focus(); 
-        } else {
-          if (startPos || startPos == '0') { 
-            var scrollTop = elemt.scrollTop; 
-            elemt.value = elemt.value.substring(0, startPos) + value + elemt.value.substring(endPos, elemt.value.length); 
-            $elemt.focus(); 
-            elemt.selectionStart = startPos + value.length; 
-            elemt.selectionEnd = startPos + value.length; 
-            elemt.scrollTop = scrollTop; 
-          } else { 
-            $elemt.value += value; 
-            $elemt.focus(); 
+            copyText.style.display = 'block';
+            hrText.style.display = 'block';
           }
         }
       }
 
-      // 请求读取剪切板
-      fn.readClipboard = async () => {
-        const result = await navigator.permissions.query({ name: 'clipboard-read' });
-        if (result.state === 'granted' || result.state === 'prompt') {
-          return navigator.clipboard
-            .readText()
-            .then(text => text)
-            .catch(err => Promise.reject(err));
+      // 在新标签页打开
+      let openHref = document.getElementById('menu-open-href');
+      if (openHref != undefined) {
+        if (href.length > 0) {
+          openHref.style.display = 'block';
+          openHref.addEventListener("click", function (e) {
+            window.open(href);
+          },{once: true});
+          hrHref.style.display = 'block';
+        } else {
+          openHref.style.display = 'none';
+          hrHref.style.display = 'none';
         }
-        return Promise.reject(result);
       }
-
-      return model;
-    }(rightMenu || {}));
+      // 复制链接
+      let copyHref = document.getElementById('menu-copy-href');
+      if (copyHref != undefined) {
+        if (href.length > 0) {
+          copyHref.style.display = 'block';
+          copyHref.addEventListener("click", function (e) {
+            copyString(href);
+          },{once: true});
+        } else {
+          copyHref.style.display = 'none';
+        }
+      }
+      // 有音乐播放器 see: layout/_third-party/aplayer/script.ejs
+      
+      return false; // 该行代码确保系统自带的右键菜单不会被调出
+    }
+    function hideMenu() {
+      document.getElementById('rightmenu-wrapper').style.display = 'none';
+    }
+    function copyString(str) {
+      const input = document.createElement('input');
+      input.setAttribute('readonly', 'readonly');
+      document.body.appendChild(input);
+      input.setAttribute('value', str);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+    }
+    document.execCommand('click');
   </script>
 
-
-<!-- rightmenu要在darkmode之前（ToggleButton） darkmode要在comments之前（volantis.dark.push）-->
-
-  <script>
-const rootElement = document.documentElement;
-const darkModeStorageKey = "user-color-scheme";
-const rootElementDarkModeAttributeName = "data-user-color-scheme";
-const setLS = (k, v) => {
-    localStorage.setItem(k, v);
-};
-const removeLS = (k) => {
-    localStorage.removeItem(k);
-};
-const getLS = (k) => {
-    return localStorage.getItem(k);
-};
-const getModeFromCSSMediaQuery = () => {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-};
-const resetRootDarkModeAttributeAndLS = () => {
-  rootElement.removeAttribute(rootElementDarkModeAttributeName);
-  removeLS(darkModeStorageKey);
-};
-const validColorModeKeys = {
-  dark: true,
-  light: true,
-};
-const applyCustomDarkModeSettings = (mode) => {
-  const currentSetting = mode || getLS(darkModeStorageKey);
-  getCustomDarkMode();
-  if (currentSetting === getModeFromCSSMediaQuery()) {
-    resetRootDarkModeAttributeAndLS();
-  } else if (validColorModeKeys[currentSetting]) {
-    rootElement.setAttribute(rootElementDarkModeAttributeName, currentSetting);
-  } else {
-    resetRootDarkModeAttributeAndLS();
-  }
-};
-const invertDarkModeObj = {
-  dark: "light",
-  light: "dark",
-};
-/**
- * get target mode
- */
- const getCustomDarkMode = () => {
-  let currentSetting = getLS(darkModeStorageKey);
-  if (validColorModeKeys[currentSetting]) {
-    currentSetting = invertDarkModeObj[currentSetting];
-  } else if (currentSetting === null) {
-    currentSetting = invertDarkModeObj[getModeFromCSSMediaQuery()];
-  } else {
-    return;
-  }
-  if(currentSetting=="dark"){
-    volantis.dark.mode="light";
-  }else{
-    volantis.dark.mode="dark";
-  }
-  // console.log(volantis.dark.mode)
-};
-const toggleCustomDarkMode = () => {
-  let currentSetting = getLS(darkModeStorageKey);
-  if (validColorModeKeys[currentSetting]) {
-    currentSetting = invertDarkModeObj[currentSetting];
-  } else if (currentSetting === null) {
-    currentSetting = invertDarkModeObj[getModeFromCSSMediaQuery()];
-  } else {
-    return;
-  }
-  setLS(darkModeStorageKey, currentSetting);
-  return currentSetting;
-};
-/**
- * 暗黑模式触发器
- */
-volantis.dark.toggle=()=>{
-  const mode = toggleCustomDarkMode();
-  applyCustomDarkModeSettings(mode);
-  // 使用 volantis.dark.push 方法传入volantis.dark.toggle回调函数 参见layout/_partial/scripts/global.ejs
-  volantis.dark.method.toggle.start();
-}
-/**
- * bind event for toggle button
- */
-var btn=$(".toggle-mode-btn","#wrapper,#rightmenu-wrapper");
-function bindToggleButton() {
-    btn.on('click',volantis.dark.toggle);
-}
-applyCustomDarkModeSettings();
-document.addEventListener("DOMContentLoaded", bindToggleButton);
-volantis.pjax.push(bindToggleButton);
-volantis.pjax.send(()=>{
-	btn.unbind('click');
-},'toggle-mode-btn-unbind');
-</script>
 
 
 
@@ -1813,37 +1534,97 @@ function setSearchService() {
 
 
 
+  <script>
+const rootElement = document.documentElement;
+const darkModeStorageKey = "user-color-scheme";
+const rootElementDarkModeAttributeName = "data-user-color-scheme";
 
+const setLS = (k, v) => {
+    localStorage.setItem(k, v);
+};
 
+const removeLS = (k) => {
+    localStorage.removeItem(k);
+};
 
+const getLS = (k) => {
+    return localStorage.getItem(k);
+};
 
+const getModeFromCSSMediaQuery = () => {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+};
 
+const resetRootDarkModeAttributeAndLS = () => {
+  rootElement.removeAttribute(rootElementDarkModeAttributeName);
+  removeLS(darkModeStorageKey);
+};
 
+const validColorModeKeys = {
+  dark: true,
+  light: true,
+};
 
-<script>
-  volantis.message=(title,message,type,autoClose)=>{
-    if (typeof $.message=='undefined') {
-      
-        var messageJS='/js/message.js'
-        var messageCSS='/css/message.css'
-      
-      loadCSS(messageCSS)
-      loadScript(messageJS,()=>{
-        start(title,message,type,autoClose)
-      })
-    }else{
-      start(title,message,type,autoClose)
-    }
-    function start(title,message,type,autoClose){
-        $.message({
-          title: title,
-          message: message,
-          type: type,
-          autoClose: autoClose,
-        });
-    }
+const applyCustomDarkModeSettings = (mode) => {
+  const currentSetting = mode || getLS(darkModeStorageKey);
+
+  if (currentSetting === getModeFromCSSMediaQuery()) {
+    resetRootDarkModeAttributeAndLS();
+  } else if (validColorModeKeys[currentSetting]) {
+    rootElement.setAttribute(rootElementDarkModeAttributeName, currentSetting);
+  } else {
+    resetRootDarkModeAttributeAndLS();
   }
+};
+
+const invertDarkModeObj = {
+  dark: "light",
+  light: "dark",
+};
+
+/**
+ * get target mode
+ */
+const toggleCustomDarkMode = () => {
+  let currentSetting = getLS(darkModeStorageKey);
+
+  if (validColorModeKeys[currentSetting]) {
+    currentSetting = invertDarkModeObj[currentSetting];
+  } else if (currentSetting === null) {
+    currentSetting = invertDarkModeObj[getModeFromCSSMediaQuery()];
+  } else {
+    return;
+  }
+  setLS(darkModeStorageKey, currentSetting);
+  return currentSetting;
+};
+
+/**
+ * bind click event for toggle button
+ */
+var btn=$("#wrapper .toggle-mode-btn,#rightmenu-wrapper .toggle-mode-btn");
+function bindToggleButton() {
+    btn.on('click',(e) => {
+      const mode = toggleCustomDarkMode();
+      applyCustomDarkModeSettings(mode);
+    });
+}
+
+applyCustomDarkModeSettings();
+document.addEventListener("DOMContentLoaded", bindToggleButton);
+volantis.pjax.push(bindToggleButton);
+volantis.pjax.send(()=>{
+	btn.unbind('click');
+},'toggle-mode-btn-unbind');
 </script>
+
+
+
+
+
+
 
 
 <script>
@@ -1969,22 +1750,41 @@ document.addEventListener("pjax:success", listennSidebarTOC);
         }
       } catch (error) {}
 
+      window.subData = null; // 移除标题（用于一二级导航栏切换处）
+
+      volantis.$switcher.removeClass('active'); // 关闭移动端激活的搜索框
+      volantis.$header.removeClass('z_search-open'); // 关闭移动端激活的搜索框
+      volantis.$wrapper.removeClass('sub'); // 跳转页面时关闭二级导航
+
       // 解绑事件 避免重复监听
-      // 使用 volantis.pjax.send 方法传入pjax:send回调函数 参见layout/_partial/scripts/global.ejs
-      volantis.pjax.method.send.start();
+      volantis.$topBtn.unbind('click');
+      $('.menu a').unbind('click');
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+	  // 使用 volantis.pjax.send 方法传入pjax:send回调函数 参见layout/_partial/scripts/global.ejs
+	  volantis.pjax.method.send.start();
     });
 
     document.addEventListener('pjax:complete', function () {
+      $('.nav-main').find('.list-v').not('.menu-phone').removeAttr("style",""); // 移除小尾巴的移除
+      $('.menu-phone.list-v').removeAttr("style",""); // 移除小尾巴的移除
       $('script[data-pjax], .pjax-reload script').each(function () {
         $(this).parent().append($(this).remove());
       });
-      // 使用 volantis.pjax.push 方法传入重载函数 参见layout/_partial/scripts/global.ejs
-      volantis.pjax.method.complete.start();
+      try{
+		// 使用 volantis.pjax.push 方法传入重载函数 参见layout/_partial/scripts/global.ejs
+		volantis.pjax.method.complete.start();
+      } catch (e) {
+        console.log(e);
+      }
     });
 
     document.addEventListener('pjax:error', function (e) {
-      // 使用 volantis.pjax.error 方法传入pjax:error回调函数 参见layout/_partial/scripts/global.ejs
-      volantis.pjax.method.error.start();
+	  // 使用 volantis.pjax.error 方法传入pjax:error回调函数 参见layout/_partial/scripts/global.ejs
+	  volantis.pjax.method.error.start();
       window.location.href = e.triggerElement.href;
     });
 </script>
