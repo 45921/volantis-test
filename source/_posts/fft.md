@@ -19,7 +19,7 @@ description: 年轻人的第一个高级算法（并不是）自学 FFT 的一�
 
 ### 多项式
 
-对于数域 $ \mathbb{F}$，若有 $\forall i\in\{1,2,3,\cdots,n \}$，则：
+对于数域 $\mathbb{F}$，若有 $\forall i\in\{1,2,3,\cdots,n \}$，则：
 $$
 f(x)=a_0+a_1x+a_2x^2+\cdots+a_nx=\sum_{i=0}^n a_ix^i \ (a_n \neq 0)
 $$
